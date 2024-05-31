@@ -150,7 +150,10 @@ export const updateUsers = async (req, res) => {
     const token = authHeader && authHeader.split(' ')[1]
     if (!token) return res.status(204).json({ msg: 'No token provided' })
 
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
+    const decoded = jwt.verify(
+      token,
+      process.env.ACCESS_TOKEN_SECRET || 'qwerttyuio12345asdfghjkl67890zxcvbnm',
+    )
 
     const user = await Users.findOne({
       where: {
@@ -162,57 +165,45 @@ export const updateUsers = async (req, res) => {
       return res.status(404).json({ msg: 'User not found' })
     }
 
-    let fileName = 'default.png'
-    if (req.files && req.files.file) {
-      const file = req.files.file
-      const fileSize = file.data.length
+    let fileName = user.image || 'default.png'
+    if (req.files && req.files.image) {
+      // Periksa req.files.image
+      console.log('File upload detected')
+
+      const file = req.files.image // Akses file sebagai req.files.image
+      const fileSize = file.size
       const ext = path.extname(file.name)
-      fileName = `${file.md5}${ext}`
-      const allowedTypes = ['.png', '.jpg', '.jpeg']
+      fileName = file.md5 + ext
 
-      if (!allowedTypes.includes(ext.toLowerCase())) {
-        return res.status(422).json({ msg: 'Invalid image format' })
+      const allowedType = ['.png', '.jpg', '.jpeg']
+      if (!allowedType.includes(ext.toLowerCase())) {
+        return res.status(422).json({ msg: 'Invalid image type' })
       }
-
       if (fileSize > 5000000) {
         return res.status(422).json({ msg: 'Max image size is 5MB' })
       }
 
-      const filePath = `./public/images/${fileName}`
-      file.mv(filePath, (err) => {
+      file.mv(`./public/images/${fileName}`, (err) => {
         if (err) {
+          console.log('Error moving file:', err.message)
           return res.status(500).json({ msg: err.message })
         }
-
-        // Optionally remove the old image
-        if (user.image && user.image !== 'default.png') {
-          const oldImagePath = `./public/images/${user.image}`
-          fs.unlink(oldImagePath, (err) => {
-            if (err) {
-              console.log('Failed to remove old image:', err)
-            }
-          })
-        }
+        console.log('File uploaded successfully')
       })
     } else {
-      fileName = user.image // Keep the existing image
+      console.log('No file upload detected')
     }
 
-    const { name, email, no_telp, alamat, tanggal_lahir, jk, nik } = req.body
-    const url = `${req.protocol}://${req.get('host')}/images/${fileName}`
+    const { name, email, phone, role } = req.body
 
     await Users.update(
       {
         name,
-        username: user.username, // Keep existing username
+        username: user.username,
         email,
-        no_telp,
-        alamat,
-        tanggal_lahir,
-        jk,
-        nik,
+        phone,
+        role,
         image: fileName,
-        url,
       },
       {
         where: {
@@ -223,8 +214,8 @@ export const updateUsers = async (req, res) => {
 
     res.status(200).json({ msg: 'User updated successfully' })
   } catch (error) {
-    console.log(error.message)
-    res.status(500).json({ msg: error.message })
+    console.log('Error updating user:', error.message)
+    res.status(500).json({ msg: error.message, error: 'Internal server error' })
   }
 }
 

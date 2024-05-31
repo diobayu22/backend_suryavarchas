@@ -32,6 +32,7 @@ app.use(cors(corsOptions))
 app.use(cookieParser())
 app.use(express.json())
 app.use(fileUpload())
+app.use(express.urlencoded({ extended: true }))
 app.use(express.static('public'))
 
 // Set additional headers to handle preflight requests
