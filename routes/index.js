@@ -31,10 +31,10 @@ router.put('/update/:id', verifyToken, updateUsers) // done
 router.delete('/delete', verifyToken, deleteUser)
 
 // sopir
-router.post('/sopir', createSopir)
-router.get('/sopir', getAllSopir)
-router.get('/sopir/:id', getSopirById)
-router.put('/sopir/:id', updateSopir)
-router.delete('/sopir/:id', deleteSopir)
+router.post('/sopir', createSopir) // done
+router.get('/sopir', getAllSopir) // done
+router.get('/sopir/:id', getSopirById) // done
+router.put('/sopir/:id', updateSopir) //done
+router.delete('/sopir/:id', deleteSopir) //done
 
 export default router
