@@ -22,12 +22,12 @@ import {
 const router = express.Router()
 
 // users
-router.get('/users', getUsers)
-router.get('/me', verifyToken, Me)
-router.post('/users', Register)
-router.post('/login', Login)
-router.post('/logout', verifyToken, Logout)
-router.put('/update/:id', verifyToken, updateUsers)
+router.get('/users', getUsers) // done
+router.get('/me', verifyToken, Me) // done
+router.post('/users', Register) // done
+router.post('/login', Login) // done
+router.post('/logout', verifyToken, Logout) // done
+router.put('/update/:id', verifyToken, updateUsers) // done
 router.delete('/delete', verifyToken, deleteUser)
 
 // sopir

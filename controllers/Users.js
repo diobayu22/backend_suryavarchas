@@ -95,14 +95,24 @@ export const Login = async (req, res) => {
 
 export const Me = async (req, res) => {
   try {
+    const authHeader = req.headers['authorization']
+    const token = authHeader && authHeader.split(' ')[1]
+    if (!token) return res.status(401).json({ msg: 'Unauthorized' }) // Unauthorized if no token provided
+
+    const decoded = jwt.verify(
+      token,
+      process.env.ACCESS_TOKEN_SECRET || 'qwerttyuio12345asdfghjkl67890zxcvbnm',
+    )
+
     const user = await Users.findOne({
       where: {
-        id: req.user.userId, // Use req.user.userId as set in the verifyToken middleware
+        id: decoded.userId,
+        refresh_token: token, // Verify token existence in the database
       },
     })
 
     if (!user) {
-      return res.sendStatus(204) // No content if user is not found
+      return res.status(401).json({ msg: 'Unauthorized' }) // Unauthorized if token not found in database
     }
 
     res.json(user) // Return the user details
@@ -116,7 +126,7 @@ export const Logout = async (req, res) => {
   try {
     const authHeader = req.headers['authorization']
     const token = authHeader && authHeader.split(' ')[1]
-    if (!token) return res.status(204).send() // No content if no token
+    if (!token) return res.status(204).json({ msg: 'No token provided' }) // No content if no token
 
     const user = await Users.findOne({
       where: {
@@ -125,7 +135,9 @@ export const Logout = async (req, res) => {
     })
 
     if (!user) {
-      return res.status(204).send() // No content if user not found
+      return res
+        .status(204)
+        .json({ msg: 'User not found or already logged out' }) // No content if user not found
     }
 
     await Users.update(
@@ -139,8 +151,8 @@ export const Logout = async (req, res) => {
 
     return res.status(200).json({ msg: 'Logout successful' })
   } catch (error) {
-    console.log(error.message)
-    return res.status(500).json({ msg: error.message })
+    console.log('Logout error:', error.message)
+    return res.status(500).json({ msg: 'Internal server error' })
   }
 }
 
@@ -148,7 +160,7 @@ export const updateUsers = async (req, res) => {
   try {
     const authHeader = req.headers['authorization']
     const token = authHeader && authHeader.split(' ')[1]
-    if (!token) return res.status(204).json({ msg: 'No token provided' })
+    if (!token) return res.status(401).json({ msg: 'Unauthorized' }) // Unauthorized if no token provided
 
     const decoded = jwt.verify(
       token,
@@ -158,11 +170,12 @@ export const updateUsers = async (req, res) => {
     const user = await Users.findOne({
       where: {
         id: decoded.userId,
+        refresh_token: token, // Verify token existence in the database
       },
     })
 
     if (!user) {
-      return res.status(404).json({ msg: 'User not found' })
+      return res.status(401).json({ msg: 'Unauthorized' }) // Unauthorized if token not found in database
     }
 
     let fileName = user.image || 'default.png'
@@ -223,18 +236,19 @@ export const deleteUser = async (req, res) => {
   try {
     const authHeader = req.headers['authorization']
     const token = authHeader && authHeader.split(' ')[1]
-    if (!token) return res.status(204).json({ msg: 'No token provided' })
+    if (!token) return res.status(401).json({ msg: 'Unauthorized' }) // Unauthorized if no token provided
 
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
 
     const user = await Users.findOne({
       where: {
         id: decoded.userId,
+        refresh_token: token, // Verify token existence in the database
       },
     })
 
     if (!user) {
-      return res.status(404).json({ msg: 'User not found' })
+      return res.status(401).json({ msg: 'Unauthorized' }) // Unauthorized if token not found in database
     }
 
     // Optionally remove the user's image
