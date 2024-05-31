@@ -18,7 +18,13 @@ import {
   updateSopir,
   deleteSopir,
 } from '../controllers/Sopirs.js'
-
+import {
+  getAllKategori,
+  getKategoriById,
+  createKategori,
+  updateKategori,
+  deleteKategori,
+} from '../controllers/Kategoris.js'
 const router = express.Router()
 
 // users
@@ -36,5 +42,12 @@ router.get('/sopir', getAllSopir) // done
 router.get('/sopir/:id', getSopirById) // done
 router.put('/sopir/:id', updateSopir) //done
 router.delete('/sopir/:id', deleteSopir) //done
+
+// kategori
+router.get('/kategori', getAllKategori) // done
+router.get('/kategori/:id', getKategoriById) // done
+router.post('/kategori', createKategori) // done
+router.put('/kategori/:id', updateKategori) // done
+router.delete('/kategori/:id', deleteKategori) // done
 
 export default router
