@@ -23,7 +23,6 @@ const Kategori = db.define(
 )
 
 export default Kategori
-
 ;(async () => {
   await db.sync()
 })()

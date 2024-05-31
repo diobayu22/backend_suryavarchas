@@ -25,6 +25,13 @@ import {
   updateKategori,
   deleteKategori,
 } from '../controllers/Kategoris.js'
+import {
+  getAllMobil,
+  getMobilById,
+  createMobil,
+  updateMobil,
+  deleteMobil,
+} from '../controllers/Mobils.js'
 const router = express.Router()
 
 // users
@@ -49,5 +56,12 @@ router.get('/kategori/:id', getKategoriById) // done
 router.post('/kategori', createKategori) // done
 router.put('/kategori/:id', updateKategori) // done
 router.delete('/kategori/:id', deleteKategori) // done
+
+// mobil
+router.get('/mobil', getAllMobil) // done
+router.get('/mobil/:id', getMobilById) // done
+router.post('/mobil', createMobil) // done
+router.put('/mobil/:id', updateMobil) // done
+router.delete('/mobil/:id', deleteMobil) // done
 
 export default router

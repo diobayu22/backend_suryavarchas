@@ -1,6 +1,6 @@
 import { Sequelize } from 'sequelize'
 import db from '../config/Database.js'
-import Kategori from './Kategori.js'
+import Kategori from './KategoriModel.js'
 
 const { DataTypes } = Sequelize
 
@@ -45,8 +45,10 @@ const Mobil = db.define(
   },
 )
 
-export default Mobil
+Kategori.hasMany(Mobil, { foreignKey: 'kategori_id' })
+Mobil.belongsTo(Kategori, { foreignKey: 'kategori_id' })
 
+export default Mobil
 ;(async () => {
   await db.sync()
 })()
