@@ -32,6 +32,13 @@ import {
   updateMobil,
   deleteMobil,
 } from '../controllers/Mobils.js'
+import {
+  createPembayaran,
+  updatePembayaran,
+  deletePembayaran,
+  getAllPembayaran,
+  getPembayaranById,
+} from '../controllers/Pembayarans.js'
 const router = express.Router()
 
 // users
@@ -63,5 +70,12 @@ router.get('/mobil/:id', getMobilById) // done
 router.post('/mobil', createMobil) // done
 router.put('/mobil/:id', updateMobil) // done
 router.delete('/mobil/:id', deleteMobil) // done
+
+// pembayaran
+router.post('/pembayaran', createPembayaran) // done
+router.put('/pembayaran/:id', updatePembayaran) // done
+router.delete('/pembayaran/:id', deletePembayaran) // done
+router.get('/pembayaran', getAllPembayaran) // done
+router.get('/pembayaran/:id', getPembayaranById) // done
 
 export default router
