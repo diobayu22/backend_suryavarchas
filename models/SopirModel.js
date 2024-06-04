@@ -25,6 +25,12 @@ const Sopir = db.define(
     alamat: {
       type: DataTypes.TEXT,
     },
+    image: {
+      type: DataTypes.STRING(255),
+    },
+    url: {
+      type: DataTypes.STRING(255),
+    },
   },
   {
     freezeTableName: true,
@@ -33,7 +39,6 @@ const Sopir = db.define(
 )
 
 export default Sopir
-
 ;(async () => {
   await db.sync()
 })()

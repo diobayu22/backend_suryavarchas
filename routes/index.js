@@ -9,6 +9,8 @@ import {
   resetPassword,
   updateUsers,
   deleteUser,
+  getUSerById,
+  updateUsersWithToken,
 } from '../controllers/Users.js'
 import { verifyToken } from '../middleware/VerifyToken.js'
 import {
@@ -38,6 +40,7 @@ import {
   deletePembayaran,
   getAllPembayaran,
   getPembayaranById,
+  updatePembayaranStatus,
 } from '../controllers/Pembayarans.js'
 const router = express.Router()
 
@@ -47,9 +50,10 @@ router.get('/me', verifyToken, Me) // done
 router.post('/users', Register) // done
 router.post('/login', Login) // done
 router.post('/logout', verifyToken, Logout) // done
-router.put('/update/:id', verifyToken, updateUsers) // done
+router.put('/update/:id', verifyToken, updateUsersWithToken) // done
+router.put('/updatenotoken/:id', updateUsers) // done
 router.delete('/delete', verifyToken, deleteUser)
-
+router.get('/users/:id', getUSerById) // done
 // sopir
 router.post('/sopir', createSopir) // done
 router.get('/sopir', getAllSopir) // done
@@ -74,6 +78,7 @@ router.delete('/mobil/:id', deleteMobil) // done
 // pembayaran
 router.post('/pembayaran', createPembayaran) // done
 router.put('/pembayaran/:id', updatePembayaran) // done
+router.put('/pembayaran/:id/status', updatePembayaranStatus)
 router.delete('/pembayaran/:id', deletePembayaran) // done
 router.get('/pembayaran', getAllPembayaran) // done
 router.get('/pembayaran/:id', getPembayaranById) // done

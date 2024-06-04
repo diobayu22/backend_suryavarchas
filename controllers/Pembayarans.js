@@ -71,7 +71,11 @@ export const createPembayaran = async (req, res) => {
     plokasi,
     ptanggal,
     pwaktu,
-    status,
+    klokasi,
+    ktanggal,
+    kwaktu,
+    kategori,
+    total,
     sopir_id,
     mobil_id,
     user_id,
@@ -100,6 +104,8 @@ export const createPembayaran = async (req, res) => {
     })
   }
 
+  const url = `${req.protocol}://${req.get('host')}/images/${fileName}`
+
   try {
     const pembayaran = await Pembayaran.create({
       tipe_identitas,
@@ -111,11 +117,17 @@ export const createPembayaran = async (req, res) => {
       plokasi,
       ptanggal,
       pwaktu,
-      status,
+      klokasi,
+      ktanggal,
+      kwaktu,
+      kategori,
+      total,
+      status: 'Pending', // Set default status to "Pending"
       image: fileName,
       sopir_id: sopir_id || null,
       mobil_id,
       user_id,
+      url: url,
     })
     res.status(201).json({ msg: 'Pembayaran berhasil dibuat', pembayaran })
   } catch (error) {
@@ -135,6 +147,11 @@ export const updatePembayaran = async (req, res) => {
     plokasi,
     ptanggal,
     pwaktu,
+    klokasi,
+    ktanggal,
+    kwaktu,
+    kategori,
+    total,
     status,
     sopir_id,
     mobil_id,
@@ -172,6 +189,8 @@ export const updatePembayaran = async (req, res) => {
       })
     }
 
+    const url = `${req.protocol}://${req.get('host')}/images/${fileName}`
+
     pembayaran.tipe_identitas = tipe_identitas
     pembayaran.no_identitas = no_identitas
     pembayaran.nama = nama
@@ -181,13 +200,40 @@ export const updatePembayaran = async (req, res) => {
     pembayaran.plokasi = plokasi
     pembayaran.ptanggal = ptanggal
     pembayaran.pwaktu = pwaktu
+    pembayaran.klokasi = klokasi
+    pembayaran.ktanggal = ktanggal
+    pembayaran.kwaktu = kwaktu
+    pembayaran.kategori = kategori
+    pembayaran.total = total
     pembayaran.status = status
     pembayaran.image = fileName
     pembayaran.sopir_id = sopir_id || null
     pembayaran.mobil_id = mobil_id
     pembayaran.user_id = user_id
+    pembayaran.url = url
     await pembayaran.save()
     res.status(200).json({ msg: 'Pembayaran berhasil diupdate', pembayaran })
+  } catch (error) {
+    res.status(500).json({ msg: error.message, data: 'error gagal nih' })
+  }
+}
+
+// Update payment status only
+export const updatePembayaranStatus = async (req, res) => {
+  const { status } = req.body
+  try {
+    const pembayaran = await Pembayaran.findOne({
+      where: { id: req.params.id },
+    })
+    if (!pembayaran) {
+      return res.status(404).json({ msg: 'Pembayaran tidak ditemukan' })
+    }
+
+    pembayaran.status = status
+    await pembayaran.save()
+    res
+      .status(200)
+      .json({ msg: 'Status pembayaran berhasil diupdate', pembayaran })
   } catch (error) {
     res.status(500).json({ msg: error.message })
   }

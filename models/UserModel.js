@@ -26,6 +26,9 @@ const User = db.define(
     name: {
       type: DataTypes.STRING(100),
     },
+    alamat: {
+      type: DataTypes.STRING(100),
+    },
     phone: {
       type: DataTypes.STRING(15),
     },
@@ -36,6 +39,9 @@ const User = db.define(
       type: DataTypes.TEXT,
     },
     image: {
+      type: DataTypes.STRING(255),
+    },
+    url: {
       type: DataTypes.STRING(255),
     },
   },

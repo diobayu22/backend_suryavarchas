@@ -42,10 +42,28 @@ const Pembayaran = db.define(
     pwaktu: {
       type: DataTypes.TIME,
     },
+    klokasi: {
+      type: DataTypes.TEXT,
+    },
+    ktanggal: {
+      type: DataTypes.DATE,
+    },
+    kwaktu: {
+      type: DataTypes.TIME,
+    },
+    kategori: {
+      type: DataTypes.STRING(50),
+    },
+    total: {
+      type: DataTypes.STRING(50),
+    },
     status: {
       type: DataTypes.STRING(50),
     },
     image: {
+      type: DataTypes.STRING(255),
+    },
+    url: {
       type: DataTypes.STRING(255),
     },
     sopir_id: {

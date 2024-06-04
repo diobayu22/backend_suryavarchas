@@ -28,8 +28,29 @@ const Mobil = db.define(
     pajak: {
       type: DataTypes.DATE,
     },
-    image: {
-      type: DataTypes.STRING(255),
+    images: {
+      type: DataTypes.TEXT,
+    },
+    urls: {
+      type: DataTypes.TEXT,
+    },
+    tempat_duduk: {
+      type: DataTypes.INTEGER,
+    },
+    transmisi: {
+      type: DataTypes.STRING(50),
+    },
+    bahan_bakar: {
+      type: DataTypes.STRING(50),
+    },
+    deskripsi: {
+      type: DataTypes.TEXT,
+    },
+    jumlah: {
+      type: DataTypes.INTEGER,
+    },
+    harga: {
+      type: DataTypes.FLOAT,
     },
     kategori_id: {
       type: DataTypes.INTEGER,

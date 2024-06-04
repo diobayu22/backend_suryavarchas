@@ -4,6 +4,7 @@ import path from 'path'
 import fs from 'fs'
 import jwt from 'jsonwebtoken'
 import nodemailer from 'nodemailer'
+import User from '../models/UserModel.js'
 
 const SECRET_KEY =
   process.env.ACCESS_TOKEN_SECRET || 'qwerttyuio12345asdfghjkl67890zxcvbnm'
@@ -31,8 +32,8 @@ export const Register = async (req, res) => {
     await Users.create({
       username: username,
       email: email,
-
       password: hashPassword,
+      role: 'user',
     })
     res.json({ msg: 'Register Berhasil' })
   } catch (error) {
@@ -57,7 +58,7 @@ export const Login = async (req, res) => {
       return res.status(400).json({ msg: 'Wrong Password' })
     }
 
-    const { id, name, username, email, phone, role, image } = user
+    const { id, name, username, email, phone, role, image, url } = user
 
     const accessToken = jwt.sign(
       {
@@ -68,6 +69,7 @@ export const Login = async (req, res) => {
         phone,
         role,
         image,
+        url,
       },
       SECRET_KEY,
       {
@@ -122,6 +124,25 @@ export const Me = async (req, res) => {
   }
 }
 
+export const getUSerById = async (req, res) => {
+  try {
+    const user = await Users.findOne({
+      where: {
+        id: req.params.id,
+      },
+    })
+
+    if (!user) {
+      return res.status(404).json({ msg: 'user not found' })
+    }
+
+    res.status(200).json(user)
+  } catch (error) {
+    console.log(error.message)
+    res.status(500).json({ msg: error.message })
+  }
+}
+
 export const Logout = async (req, res) => {
   try {
     const authHeader = req.headers['authorization']
@@ -157,6 +178,96 @@ export const Logout = async (req, res) => {
 }
 
 export const updateUsers = async (req, res) => {
+  try {
+    // const authHeader = req.headers['authorization']
+    // const token = authHeader && authHeader.split(' ')[1]
+    // if (!token) return res.status(401).json({ msg: 'Unauthorized' }) // Unauthorized if no token provided
+
+    // const decoded = jwt.verify(
+    //   token,
+    //   process.env.ACCESS_TOKEN_SECRET || 'qwerttyuio12345asdfghjkl67890zxcvbnm',
+    // )
+
+    // const user = await Users.findOne({
+    //   where: {
+    //     id: decoded.userId,
+    //     refresh_token: token, // Verify token existence in the database
+    //   },
+    // })
+
+    // if (!user) {
+    //   return res.status(401).json({ msg: 'Unauthorized' }) // Unauthorized if token not found in database
+    // }
+
+    const user = await Users.findOne({
+      where: {
+        id: req.params.id,
+      },
+    })
+
+    if (!Users) {
+      return res.status(404).json({ msg: 'Users not found' })
+    }
+
+    let fileName = user.image || 'default.png'
+    if (req.files && req.files.image) {
+      // Periksa req.files.image
+      console.log('File upload detected')
+
+      const file = req.files.image // Akses file sebagai req.files.image
+      const fileSize = file.size
+      const ext = path.extname(file.name)
+      fileName = file.md5 + ext
+
+      const allowedType = ['.png', '.jpg', '.jpeg']
+      if (!allowedType.includes(ext.toLowerCase())) {
+        return res.status(422).json({ msg: 'Invalid image type' })
+      }
+      if (fileSize > 5000000) {
+        return res.status(422).json({ msg: 'Max image size is 5MB' })
+      }
+
+      file.mv(`./public/images/${fileName}`, (err) => {
+        if (err) {
+          console.log('Error moving file:', err.message)
+          return res.status(500).json({ msg: err.message })
+        }
+        console.log('File uploaded successfully')
+      })
+    } else {
+      console.log('No file upload detected')
+    }
+
+    const url = `${req.protocol}://${req.get('host')}/images/${fileName}`
+
+    const { name, email, phone, alamat } = req.body
+
+    await Users.update(
+      {
+        name,
+        username: user.username,
+        email,
+        phone,
+        alamat,
+        role: 'user',
+        image: fileName,
+        url: url,
+      },
+      {
+        where: {
+          id: user.id,
+        },
+      },
+    )
+
+    res.status(200).json({ msg: 'User updated successfully' })
+  } catch (error) {
+    console.log('Error updating user:', error.message)
+    res.status(500).json({ msg: error.message, error: 'Internal server error' })
+  }
+}
+
+export const updateUsersWithToken = async (req, res) => {
   try {
     const authHeader = req.headers['authorization']
     const token = authHeader && authHeader.split(' ')[1]
@@ -207,7 +318,9 @@ export const updateUsers = async (req, res) => {
       console.log('No file upload detected')
     }
 
-    const { name, email, phone, role } = req.body
+    const url = `${req.protocol}://${req.get('host')}/images/${fileName}`
+
+    const { name, email, phone, alamat } = req.body
 
     await Users.update(
       {
@@ -215,8 +328,10 @@ export const updateUsers = async (req, res) => {
         username: user.username,
         email,
         phone,
-        role,
+        alamat,
+        role: 'user',
         image: fileName,
+        url: url,
       },
       {
         where: {

@@ -45,65 +45,33 @@ export const getMobilById = async (req, res) => {
 
 // Create new car
 export const createMobil = async (req, res) => {
-  const { jenis, merk, tahun, pajak, kategori_id } = req.body
+  const {
+    jenis,
+    merk,
+    tahun,
+    pajak,
+    kategori_id,
+    tempat_duduk,
+    transmisi,
+    bahan_bakar,
+    deskripsi,
+    jumlah,
+    harga,
+  } = req.body
   const no_id = generateNoId()
-  let fileName = ''
 
-  // Check if a file is uploaded
-  if (req.files && req.files.image) {
-    const file = req.files.image
-    const fileSize = file.size
-    const ext = path.extname(file.name)
-    fileName = file.md5 + ext
+  let fileNames = []
+  let urls = []
 
-    const allowedType = ['.png', '.jpg', '.jpeg']
-    if (!allowedType.includes(ext.toLowerCase())) {
-      return res.status(422).json({ msg: 'Invalid image type' })
-    }
-    if (fileSize > 5000000) {
-      return res.status(422).json({ msg: 'Max image size is 5MB' })
-    }
+  if (req.files && req.files.images) {
+    const files = Array.isArray(req.files.images)
+      ? req.files.images
+      : [req.files.images]
 
-    file.mv(`./public/images/${fileName}`, (err) => {
-      if (err) {
-        return res.status(500).json({ msg: err.message })
-      }
-    })
-  }
-
-  try {
-    const mobil = await Mobil.create({
-      no_id,
-      jenis,
-      merk,
-      tahun,
-      pajak,
-      image: fileName,
-      kategori_id,
-    })
-    res.status(201).json({ msg: 'Mobil berhasil dibuat', mobil })
-  } catch (error) {
-    res.status(500).json({ msg: error.message })
-  }
-}
-
-// Update car
-export const updateMobil = async (req, res) => {
-  const { jenis, merk, tahun, pajak, kategori_id } = req.body
-  try {
-    const mobil = await Mobil.findOne({ where: { id: req.params.id } })
-    if (!mobil) {
-      return res.status(404).json({ msg: 'Mobil tidak ditemukan' })
-    }
-
-    let fileName = mobil.image
-
-    // Check if a new file is uploaded
-    if (req.files && req.files.image) {
-      const file = req.files.image
+    files.forEach((file) => {
       const fileSize = file.size
       const ext = path.extname(file.name)
-      fileName = file.md5 + ext
+      const fileName = file.md5 + ext
 
       const allowedType = ['.png', '.jpg', '.jpeg']
       if (!allowedType.includes(ext.toLowerCase())) {
@@ -118,14 +86,104 @@ export const updateMobil = async (req, res) => {
           return res.status(500).json({ msg: err.message })
         }
       })
+
+      fileNames.push(fileName)
+      urls.push(`${req.protocol}://${req.get('host')}/images/${fileName}`)
+    })
+  }
+
+  try {
+    const mobil = await Mobil.create({
+      no_id,
+      jenis,
+      merk,
+      tahun,
+      pajak,
+      images: JSON.stringify(fileNames),
+      urls: JSON.stringify(urls),
+      tempat_duduk,
+      transmisi,
+      bahan_bakar,
+      deskripsi,
+      jumlah,
+      harga,
+      kategori_id,
+    })
+    res.status(201).json({ msg: 'Mobil berhasil dibuat', mobil })
+  } catch (error) {
+    res.status(500).json({ msg: error.message })
+  }
+}
+
+// Update car
+export const updateMobil = async (req, res) => {
+  const {
+    jenis,
+    merk,
+    tahun,
+    pajak,
+    kategori_id,
+    tempat_duduk,
+    agasi,
+    transmisi,
+    bahan_bakar,
+    deskripsi,
+    jumlah,
+    harga,
+  } = req.body
+  try {
+    const mobil = await Mobil.findOne({ where: { id: req.params.id } })
+    if (!mobil) {
+      return res.status(404).json({ msg: 'Mobil tidak ditemukan' })
+    }
+
+    let fileNames = mobil.images
+    let urls = mobil.url
+
+    if (req.files && req.files.images) {
+      const files = Array.isArray(req.files.images)
+        ? req.files.images
+        : [req.files.images]
+      fileNames = []
+      urls = []
+      for (const file of files) {
+        const fileSize = file.size
+        const ext = path.extname(file.name)
+        const fileName = file.md5 + ext
+
+        const allowedType = ['.png', '.jpg', '.jpeg']
+        if (!allowedType.includes(ext.toLowerCase())) {
+          return res.status(422).json({ msg: 'Invalid image type' })
+        }
+        if (fileSize > 5000000) {
+          return res.status(422).json({ msg: 'Max image size is 5MB' })
+        }
+
+        file.mv(`./public/images/${fileName}`, (err) => {
+          if (err) {
+            return res.status(500).json({ msg: err.message })
+          }
+        })
+
+        fileNames.push(fileName)
+        urls.push(`${req.protocol}://${req.get('host')}/images/${fileName}`)
+      }
     }
 
     mobil.jenis = jenis
     mobil.merk = merk
     mobil.tahun = tahun
     mobil.pajak = pajak
-    mobil.image = fileName
+    mobil.images = fileNames
     mobil.kategori_id = kategori_id
+    mobil.url = urls
+    mobil.tempat_duduk = tempat_duduk
+    mobil.agasi = agasi
+    mobil.transmisi = transmisi
+    mobil.bahan_bakar = bahan_bakar
+    mobil.deskripsi = deskripsi
+    mobil.jumlah = jumlah
+    mobil.harga = harga
     await mobil.save()
     res.status(200).json({ msg: 'Mobil berhasil diupdate', mobil })
   } catch (error) {
