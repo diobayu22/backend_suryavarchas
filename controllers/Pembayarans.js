@@ -16,7 +16,15 @@ export const getAllPembayaran = async (req, res) => {
         },
         {
           model: Mobil,
-          attributes: ['id', 'jenis', 'merk'],
+          attributes: [
+            'id',
+            'jenis',
+            'merk',
+            'urls',
+            'tempat_duduk',
+            'bahan_bakar',
+            'transmisi',
+          ],
         },
         {
           model: User,
@@ -76,6 +84,7 @@ export const createPembayaran = async (req, res) => {
     kwaktu,
     kategori,
     total,
+    metode,
     sopir_id,
     mobil_id,
     user_id,
@@ -122,6 +131,7 @@ export const createPembayaran = async (req, res) => {
       kwaktu,
       kategori,
       total,
+      metode,
       status: 'Pending', // Set default status to "Pending"
       image: fileName,
       sopir_id: sopir_id || null,
@@ -152,6 +162,7 @@ export const updatePembayaran = async (req, res) => {
     kwaktu,
     kategori,
     total,
+    metode,
     status,
     sopir_id,
     mobil_id,
@@ -205,6 +216,7 @@ export const updatePembayaran = async (req, res) => {
     pembayaran.kwaktu = kwaktu
     pembayaran.kategori = kategori
     pembayaran.total = total
+    pembayaran.metode = metode
     pembayaran.status = status
     pembayaran.image = fileName
     pembayaran.sopir_id = sopir_id || null
@@ -263,5 +275,50 @@ export const deletePembayaran = async (req, res) => {
     res.status(200).json({ msg: 'Pembayaran berhasil dihapus' })
   } catch (error) {
     res.status(500).json({ msg: error.message })
+  }
+}
+
+export const updatePembayaranImage = async (req, res) => {
+  try {
+    const pembayaran = await Pembayaran.findOne({
+      where: { id: req.params.id },
+    })
+    if (!pembayaran) {
+      return res.status(404).json({ msg: 'Pembayaran tidak ditemukan' })
+    }
+
+    let fileName = ''
+
+    // Check if a file is uploaded
+    if (req.files && req.files.image) {
+      const file = req.files.image
+      const fileSize = file.size
+      const ext = path.extname(file.name)
+      fileName = file.md5 + ext
+
+      const allowedType = ['.png', '.jpg', '.jpeg']
+      if (!allowedType.includes(ext.toLowerCase())) {
+        return res.status(422).json({ msg: 'Invalid image type' })
+      }
+      if (fileSize > 5000000) {
+        return res.status(422).json({ msg: 'Max image size is 5MB' })
+      }
+
+      file.mv(`./public/images/${fileName}`, (err) => {
+        if (err) {
+          return res.status(500).json({ msg: err.message })
+        }
+      })
+    }
+
+    const url = `${req.protocol}://${req.get('host')}/images/${fileName}`
+
+    pembayaran.image = fileName
+    pembayaran.url = url
+    pembayaran.status = 'Menunggu Konfirmasi'
+    await pembayaran.save()
+    res.status(200).json({ msg: 'Pembayaran berhasil diupdate', pembayaran })
+  } catch (error) {
+    res.status(500).json({ msg: error.message, data: 'error gagal nih' })
   }
 }

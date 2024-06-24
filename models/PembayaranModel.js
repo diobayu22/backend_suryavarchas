@@ -22,7 +22,6 @@ const Pembayaran = db.define(
     },
     nama: {
       type: DataTypes.STRING(100),
-      allowNull: false,
     },
     no_telp: {
       type: DataTypes.STRING(15),
@@ -61,6 +60,9 @@ const Pembayaran = db.define(
       type: DataTypes.STRING(50),
     },
     image: {
+      type: DataTypes.STRING(255),
+    },
+    metode: {
       type: DataTypes.STRING(255),
     },
     url: {

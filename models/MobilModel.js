@@ -1,6 +1,7 @@
 import { Sequelize } from 'sequelize'
 import db from '../config/Database.js'
 import Kategori from './KategoriModel.js'
+import User from './UserModel.js' // Import model User
 
 const { DataTypes } = Sequelize
 
@@ -43,6 +44,9 @@ const Mobil = db.define(
     bahan_bakar: {
       type: DataTypes.STRING(50),
     },
+    agasi: {
+      type: DataTypes.STRING(50),
+    },
     deskripsi: {
       type: DataTypes.TEXT,
     },
@@ -59,6 +63,14 @@ const Mobil = db.define(
         key: 'id',
       },
     },
+    user_id: {
+      // Foreign key to User table
+      type: DataTypes.INTEGER,
+      references: {
+        model: User,
+        key: 'id',
+      },
+    },
   },
   {
     freezeTableName: true,
@@ -68,6 +80,9 @@ const Mobil = db.define(
 
 Kategori.hasMany(Mobil, { foreignKey: 'kategori_id' })
 Mobil.belongsTo(Kategori, { foreignKey: 'kategori_id' })
+
+User.hasMany(Mobil, { foreignKey: 'user_id' })
+Mobil.belongsTo(User, { foreignKey: 'user_id' })
 
 export default Mobil
 ;(async () => {

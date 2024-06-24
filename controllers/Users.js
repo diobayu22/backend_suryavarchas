@@ -19,7 +19,7 @@ export const getUsers = async (req, res) => {
 }
 
 export const Register = async (req, res) => {
-  const { username, email, password } = req.body
+  const { username, email, role, password } = req.body
 
   const user = await Users.findOne({ where: { username } })
   if (user) {
@@ -33,7 +33,7 @@ export const Register = async (req, res) => {
       username: username,
       email: email,
       password: hashPassword,
-      role: 'user',
+      role: role,
     })
     res.json({ msg: 'Register Berhasil' })
   } catch (error) {
@@ -86,7 +86,7 @@ export const Login = async (req, res) => {
       },
     )
 
-    res.json({ accessToken, role })
+    res.json({ accessToken, role, id })
   } catch (error) {
     console.log(error.message)
     return res.status(401).json({
@@ -289,12 +289,11 @@ export const updateUsersWithToken = async (req, res) => {
       return res.status(401).json({ msg: 'Unauthorized' }) // Unauthorized if token not found in database
     }
 
-    let fileName = user.image || 'default.png'
-    if (req.files && req.files.image) {
-      // Periksa req.files.image
-      console.log('File upload detected')
+    let fileName = user.image
 
-      const file = req.files.image // Akses file sebagai req.files.image
+    // Check if a new file is uploaded
+    if (req.files && req.files.image) {
+      const file = req.files.image
       const fileSize = file.size
       const ext = path.extname(file.name)
       fileName = file.md5 + ext
@@ -309,13 +308,9 @@ export const updateUsersWithToken = async (req, res) => {
 
       file.mv(`./public/images/${fileName}`, (err) => {
         if (err) {
-          console.log('Error moving file:', err.message)
           return res.status(500).json({ msg: err.message })
         }
-        console.log('File uploaded successfully')
       })
-    } else {
-      console.log('No file upload detected')
     }
 
     const url = `${req.protocol}://${req.get('host')}/images/${fileName}`
